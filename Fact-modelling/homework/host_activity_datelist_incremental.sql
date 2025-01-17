@@ -25,6 +25,6 @@ select
 	from today t
 	full outer join yesterday y
 	on t.host = y.host
--- on CONFLICT (host, date) 
--- DO update set 
---     host_activity_datelist = EXCLUDED.host_activity_datelist
+on CONFLICT (host, date) 
+DO update set 
+    host_activity_datelist = EXCLUDED.host_activity_datelist
