@@ -1,9 +1,5 @@
--- A cumulative query to generate device_activity_datelist from events
-
--- select
--- 	max(event_time),
--- 	min(event_time)
--- from events
+-- A datelist_int generation query. 
+-- Convert the device_activity_datelist column into a datelist_int column
 
 -- dedup devices table to have 1:1 browser to device mapping
 insert into user_devices_cumulated
@@ -23,23 +19,34 @@ select
     on e.device_id = d.device_id
     where DATE(e.event_time) <= DATE('2023-01-31') and user_id is not null
 ),
--- create the date arrays for each browser_type
+-- First get the dates and calculate day offsets
+dates_with_offset AS (
+    select 
+        user_id,
+        browser_type,
+        DATE(event_time) as date_active,
+        -- Calculate days offset from start of month
+        (DATE(event_time) - DATE('2023-01-01'))::integer as d_offset
+    from mapped
+    where browser_type is not null
+),
+-- Convert to bits
 browser_date_arrays as (
     select 
         user_id,
         browser_type,
-        ARRAY_AGG(event_time order by event_time) as date_array
-    from mapped
-    where browser_type is not null
+        -- Shift to set 1 at the position of each day
+        SUM(power(2, d_offset)::bigint)::bigint::bit(32) as activity_days
+    from dates_with_offset
     group by user_id, browser_type
 ),
--- create the JSONB object from the pre-aggregated arrays
+-- create the JSONB object from aggregating by browser type
 final_agg as (
     select 
         user_id,
         jsonb_object_agg(
             browser_type, 
-            to_jsonb(date_array)
+            to_jsonb(activity_days)
         ) as browser_dates
     from browser_date_arrays
     group by user_id
@@ -50,5 +57,5 @@ select
     DATE('2023-01-31')
 from final_agg
 on CONFLICT (user_id, date) 
-DO update set 
+DO update set
     device_activity_datelist = EXCLUDED.device_activity_datelist

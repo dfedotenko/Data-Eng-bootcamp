@@ -1,8 +1,10 @@
+-- The incremental query to generate host_activity_datelist
 
-INSERT INTO hosts_cumulated
-WITH yesterday AS (
-    SELECT * FROM hosts_cumulated
-    WHERE date = DATE('2023-01-02')
+insert into hosts_cumulated
+with yesterday as (
+    select * from hosts_cumulated
+	-- the date changes according to the next day you run it on
+    where date = DATE('2023-01-02')
 ),
 today as (
 	select
@@ -10,6 +12,7 @@ today as (
 		DATE(CAST(event_time as TIMESTAMP)) as date_active
 	from events
 	where 
+		-- the date changes according to the next day you run it on
 		DATE(CAST(event_time as TIMESTAMP)) = DATE('2023-01-03')
 	and user_id is not null
 	group by host, DATE(CAST(event_time as TIMESTAMP))
@@ -25,6 +28,7 @@ select
 	from today t
 	full outer join yesterday y
 	on t.host = y.host
-on CONFLICT (host, date) 
+-- this is upsert
+on conflict (host, date) 
 DO update set 
-    host_activity_datelist = EXCLUDED.host_activity_datelist
+    host_activity_datelist = excluded.host_activity_datelist

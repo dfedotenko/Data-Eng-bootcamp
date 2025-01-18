@@ -4,6 +4,9 @@
 -- data type is MAP<STRING, ARRAY[DATE]> i.e. browser_type -> dates
 
 CREATE TYPE device_activity_ds AS (
+-- this can hold anything but in our case,
+-- it holds a browser name as a key mapped to an array of dates
+-- note I am not using a MAP DdataStruct here
     browser_dates JSONB
 )
 

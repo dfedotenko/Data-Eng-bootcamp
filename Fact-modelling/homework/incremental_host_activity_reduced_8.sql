@@ -1,19 +1,4 @@
--- A monthly, reduced fact table DDL host_activity_reduced
-
--- month
--- host
--- hit_array - think COUNT(1)
--- unique_visitors array - think COUNT(DISTINCT user_id)
-
--- -- drop table host_activity_reduced
-
--- create TABLE host_activity_reduced (
---     host text,
---     month_start date,
---     hit_array int[],
---     unique_visitors text[],
---     primary key (host, month_start)
--- )
+-- An incremental query that loads host_activity_reduced, day-by-day
 
 insert into host_activity_reduced
 with daily_aggregate as (
@@ -57,9 +42,7 @@ select
         then da.unique_visitors
     end as unique_visitors
 from daily_aggregate da
-full outer join yesterday_array ya on da.host = ya.host
+full outer join yesterday_array ya on da.host = ya.host\
+-- this is upsert
 on conflict (host, month_start)
 do update set hit_array = excluded.hit_array, unique_visitors = excluded.unique_visitors;
-
-
--- select * from host_activity_reduced
