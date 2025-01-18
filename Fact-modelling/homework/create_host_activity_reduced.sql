@@ -57,7 +57,8 @@ select
         then da.unique_visitors
     end as unique_visitors
 from daily_aggregate da
-full outer join yesterday_array ya on da.host = ya.host
+FULL OUTER join yesterday_array ya
+on da.host = ya.host
 on conflict (host, month_start)
 do update set hit_array = excluded.hit_array, unique_visitors = excluded.unique_visitors;
 
