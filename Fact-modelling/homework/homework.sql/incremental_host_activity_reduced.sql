@@ -5,15 +5,15 @@
 -- hit_array - think COUNT(1)
 -- unique_visitors array - think COUNT(DISTINCT user_id)
 
--- drop table host_activity_reduced
+-- -- drop table host_activity_reduced
 
-create TABLE host_activity_reduced (
-    host text,
-    month_start date,
-    hit_array int[],
-    unique_visitors text[],
-    primary key (host, month_start)
-)
+-- create TABLE host_activity_reduced (
+--     host text,
+--     month_start date,
+--     hit_array int[],
+--     unique_visitors text[],
+--     primary key (host, month_start)
+-- )
 
 insert into host_activity_reduced
 with daily_aggregate as (
