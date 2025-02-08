@@ -231,11 +231,11 @@ m = spark.table("bootcamp.matches_bucketed")
 mmp = spark.table("bootcamp.medal_matches_players_bucketed")
 md = spark.table("bootcamp.match_details_bucketed")
 
-aggregateDF1 = m.alias("m").join((md).alias("md"), col("m.match_id") == col("md.match_id")
+aggregateDF1 = m.alias("m").join((md).alias("md"), col("m.match_id") == col("md.match_id"), "left_outer"
 ).select(col("m.match_id"), col("m.mapid"), col("m.playlist_id"), col("md.player_gamertag"),  col("md.player_total_kills")
 )
 
-aggregateDF2 = aggregateDF1.alias("adf1").join((mmp).alias("mmp"), col("adf1.match_id") == col("mmp.match_id")
+aggregateDF2 = aggregateDF1.alias("adf1").join((mmp).alias("mmp"), col("adf1.match_id") == col("mmp.match_id"), "left_outer"
 ).select(col("adf1.*"), col("mmp.medal_id"), col("mmp.count").alias("medal_count"))
 
 aggregateDF2.show()
